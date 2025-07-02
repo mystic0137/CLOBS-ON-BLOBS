@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence, Variants } from 'framer-motion'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -15,7 +15,9 @@ import {
   Clock,
   ArrowRight,
   Trophy,
-  Twitter
+  Twitter,
+  Moon,
+  Sun
 } from 'lucide-react'
 
 interface LearningModule {
@@ -31,6 +33,29 @@ interface LearningModule {
 const Dashboard: React.FC = () => {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null)
   const [completedModules, setCompletedModules] = useState<Set<string>>(new Set())
+  const [isDarkMode, setIsDarkMode] = useState(true) // Default to dark mode
+
+  // Load theme preference from localStorage on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme')
+    if (savedTheme) {
+      setIsDarkMode(savedTheme === 'dark')
+    }
+  }, [])
+
+  // Save theme preference and apply to document
+  useEffect(() => {
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light')
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }, [isDarkMode])
+
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode)
+  }
 
   const modules: LearningModule[] = [
     {
@@ -93,7 +118,7 @@ const Dashboard: React.FC = () => {
   const intermediateModules = modules.slice(1)
   const progressPercentage = (completedModules.size / modules.length) * 100
 
-  // Fixed Animation Variants
+  // Animation Variants
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
@@ -165,7 +190,9 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className={`min-h-screen transition-colors duration-300 ${
+      isDarkMode ? 'bg-zinc-900' : 'bg-zinc-50'
+    }`}>
       {/* Pink Accent Bar */}
       <div className="h-1 bg-gradient-to-r from-fuchsia-500 via-pink-500 to-fuchsia-600" />
 
@@ -174,7 +201,11 @@ const Dashboard: React.FC = () => {
         variants={headerVariants}
         initial="hidden"
         animate="visible"
-        className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-zinc-200"
+        className={`sticky top-0 z-50 w-full backdrop-blur-md border-b transition-colors duration-300 ${
+          isDarkMode 
+            ? 'bg-zinc-900/95 border-zinc-700' 
+            : 'bg-white/95 border-zinc-200'
+        }`}
       >
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -184,22 +215,36 @@ const Dashboard: React.FC = () => {
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.2 }}
             >
-              <div className="w-8 h-8 bg-zinc-900 rounded-lg flex items-center justify-center">
-                <Trophy className="w-5 h-5 text-white" />
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                isDarkMode ? 'bg-white' : 'bg-zinc-900'
+              }`}>
+                <Trophy className={`w-5 h-5 ${isDarkMode ? 'text-zinc-900' : 'text-white'}`} />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-zinc-900">Learning Hub</h1>
-                <p className="text-sm text-zinc-500">Concepts made Simple</p>
+                <h1 className={`text-xl font-bold ${
+                  isDarkMode ? 'text-white' : 'text-zinc-900'
+                }`}>
+                  Learning Hub
+                </h1>
+                <p className={`text-sm ${
+                  isDarkMode ? 'text-zinc-400' : 'text-zinc-500'
+                }`}>
+                  Concepts made Simple
+                </p>
               </div>
             </motion.div>
 
-            {/* Progress & User */}
+            {/* Progress, Theme Toggle & User */}
             <div className="flex items-center space-x-4">
               <div className="hidden sm:flex items-center space-x-3">
-                <span className="text-sm text-zinc-600">
+                <span className={`text-sm ${
+                  isDarkMode ? 'text-zinc-300' : 'text-zinc-600'
+                }`}>
                   {completedModules.size}/{modules.length} Complete
                 </span>
-                <div className="w-24 h-2 bg-zinc-200 rounded-full overflow-hidden">
+                <div className={`w-24 h-2 rounded-full overflow-hidden ${
+                  isDarkMode ? 'bg-zinc-700' : 'bg-zinc-200'
+                }`}>
                   <motion.div
                     className="h-full bg-gradient-to-r from-fuchsia-500 to-pink-500"
                     initial={{ width: '0%' }}
@@ -208,7 +253,30 @@ const Dashboard: React.FC = () => {
                   />
                 </div>
               </div>
-            
+              
+              {/* Theme Toggle Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleTheme}
+                className={`p-2 rounded-lg transition-colors ${
+                  isDarkMode 
+                    ? 'hover:bg-zinc-800 text-zinc-300 hover:text-white' 
+                    : 'hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900'
+                }`}
+              >
+                <motion.div
+                  initial={false}
+                  animate={{ rotate: isDarkMode ? 0 : 180 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {isDarkMode ? (
+                    <Sun className="w-5 h-5" />
+                  ) : (
+                    <Moon className="w-5 h-5" />
+                  )}
+                </motion.div>
+              </Button>
             </div>
           </div>
         </div>
@@ -224,21 +292,27 @@ const Dashboard: React.FC = () => {
           {/* Hero Section */}
           <motion.section variants={cardVariants} className="text-center space-y-6">
             <div className="space-y-4">
-              <h1 className="text-4xl sm:text-5xl font-bold text-zinc-900">
+              <h1 className={`text-4xl sm:text-5xl font-bold ${
+                isDarkMode ? 'text-white' : 'text-zinc-900'
+              }`}>
                 CLOBS ON BLOBS
               </h1>
-              <p className="text-xl text-zinc-600 max-w-3xl mx-auto">
+              <p className={`text-xl max-w-3xl mx-auto ${
+                isDarkMode ? 'text-zinc-300' : 'text-zinc-600'
+              }`}>
                 Hands on experience of CLOBS, Problems with CEX, Centralized Sequencers and Basic Understanding of CLOBS ON BLOBS
               </p>
             </div>
             
             {completedModules.size === 0 ? (
-              <div className="flex items-center justify-center space-x-2 text-zinc-500">
+              <div className={`flex items-center justify-center space-x-2 ${
+                isDarkMode ? 'text-zinc-400' : 'text-zinc-500'
+              }`}>
                 <Clock className="w-5 h-5" />
                 <span>Journey Not Started</span>
               </div>
             ) : (
-              <div className="flex items-center justify-center space-x-2 text-fuchsia-600">
+              <div className="flex items-center justify-center space-x-2 text-fuchsia-400">
                 <CheckCircle className="w-5 h-5" />
                 <span className="font-semibold">
                   {completedModules.size} of {modules.length} modules completed
@@ -250,8 +324,14 @@ const Dashboard: React.FC = () => {
           {/* Foundation Section */}
           <motion.section variants={cardVariants} className="space-y-8">
             <div className="text-center space-y-3">
-              <h2 className="text-3xl font-bold text-zinc-900">🎯 Learn about CLOBS</h2>
-              <p className="text-zinc-600 max-w-2xl mx-auto">
+              <h2 className={`text-3xl font-bold ${
+                isDarkMode ? 'text-white' : 'text-zinc-900'
+              }`}>
+                🎯 Learn about CLOBS
+              </h2>
+              <p className={`max-w-2xl mx-auto ${
+                isDarkMode ? 'text-zinc-300' : 'text-zinc-600'
+              }`}>
                 Explore CLOB Fundamentals
               </p>
             </div>
@@ -264,10 +344,16 @@ const Dashboard: React.FC = () => {
                 onHoverEnd={() => setHoveredCard(null)}
                 className="w-full max-w-lg"
               >
-                <Card className="border-2 border-fuchsia-200 bg-white shadow-lg hover:shadow-xl transition-all duration-300">
+                <Card className={`border-2 border-fuchsia-200 shadow-lg hover:shadow-xl transition-all duration-300 ${
+                  isDarkMode 
+                    ? 'bg-zinc-800 border-fuchsia-400/30 hover:border-fuchsia-400/50' 
+                    : 'bg-white hover:shadow-xl'
+                }`}>
                   <CardHeader className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <div className="p-3 bg-fuchsia-50 rounded-xl">
+                      <div className={`p-3 rounded-xl ${
+                        isDarkMode ? 'bg-fuchsia-500/10' : 'bg-fuchsia-50'
+                      }`}>
                         {foundationModule.icon}
                       </div>
                       {completedModules.has(foundationModule.id) && (
@@ -275,10 +361,14 @@ const Dashboard: React.FC = () => {
                       )}
                     </div>
                     <div>
-                      <CardTitle className="text-2xl text-zinc-900">
+                      <CardTitle className={`text-2xl ${
+                        isDarkMode ? 'text-white' : 'text-zinc-900'
+                      }`}>
                         {foundationModule.title}
                       </CardTitle>
-                      <CardDescription className="mt-2 text-base text-zinc-600">
+                      <CardDescription className={`mt-2 text-base ${
+                        isDarkMode ? 'text-zinc-300' : 'text-zinc-600'
+                      }`}>
                         {foundationModule.description}
                       </CardDescription>
                     </div>
@@ -306,8 +396,14 @@ const Dashboard: React.FC = () => {
           {/* Intermediate & Advanced Section */}
           <motion.section variants={cardVariants} className="space-y-8">
             <div className="text-center space-y-3">
-              <h2 className="text-3xl font-bold text-zinc-900">🚀 Learn More</h2>
-              <p className="text-zinc-600 max-w-2xl mx-auto">
+              <h2 className={`text-3xl font-bold ${
+                isDarkMode ? 'text-white' : 'text-zinc-900'
+              }`}>
+                🚀 Learn More
+              </h2>
+              <p className={`max-w-2xl mx-auto ${
+                isDarkMode ? 'text-zinc-300' : 'text-zinc-600'
+              }`}>
                 Explore by Playing User, Sequencer and Learn about CLOBS ON BLOBS
               </p>
             </div>
@@ -328,22 +424,34 @@ const Dashboard: React.FC = () => {
                       transition={{ delay: index * 0.1 }}
                     >
                       <Card 
-                        className="h-full cursor-pointer group border-zinc-200 hover:border-fuchsia-300 bg-white hover:shadow-lg transition-all duration-300"
+                        className={`h-full cursor-pointer group transition-all duration-300 ${
+                          isDarkMode 
+                            ? 'border-zinc-700 hover:border-fuchsia-400/50 bg-zinc-800 hover:shadow-lg hover:shadow-fuchsia-500/10' 
+                            : 'border-zinc-200 hover:border-fuchsia-300 bg-white hover:shadow-lg'
+                        }`}
                         onClick={() => handleModuleClick(module.url, module.id)}
                       >
                         <CardHeader className="pb-4">
                           <div className="flex items-center justify-between mb-3">
-                            <div className="p-2 bg-zinc-50 group-hover:bg-fuchsia-50 rounded-lg transition-colors duration-300">
+                            <div className={`p-2 rounded-lg transition-colors duration-300 ${
+                              isDarkMode 
+                                ? 'bg-zinc-700 group-hover:bg-fuchsia-500/10' 
+                                : 'bg-zinc-50 group-hover:bg-fuchsia-50'
+                            }`}>
                               {module.icon}
                             </div>
                             {completedModules.has(module.id) && (
                               <CheckCircle className="w-4 h-4 text-green-500" />
                             )}
                           </div>
-                          <CardTitle className="text-lg text-zinc-900">
+                          <CardTitle className={`text-lg ${
+                            isDarkMode ? 'text-white' : 'text-zinc-900'
+                          }`}>
                             {module.title}
                           </CardTitle>
-                          <CardDescription className="text-sm text-zinc-600 line-clamp-2">
+                          <CardDescription className={`text-sm line-clamp-2 ${
+                            isDarkMode ? 'text-zinc-300' : 'text-zinc-600'
+                          }`}>
                             {module.description}
                           </CardDescription>
                         </CardHeader>
@@ -362,21 +470,37 @@ const Dashboard: React.FC = () => {
                       variants={featuredCardVariants}
                       whileHover="hover"
                       onHoverStart={() => setHoveredCard(module.id)}
-                      onHoverEnd={() => setHoveredCard(null)}
+                      onHoverEnd={() => setHoveredCard(module.id)}
                       className="sticky top-28"
                     >
-                      <Card className="relative overflow-hidden border-2 border-fuchsia-300 bg-gradient-to-br from-white to-fuchsia-50 cursor-pointer group shadow-lg hover:shadow-xl">
-                        <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500/5 to-pink-500/5" />
+                      <Card className={`relative overflow-hidden border-2 cursor-pointer group shadow-lg hover:shadow-xl transition-all duration-300 ${
+                        isDarkMode 
+                          ? 'border-fuchsia-400/30 bg-gradient-to-br from-zinc-800 to-zinc-800/80 hover:shadow-fuchsia-500/20' 
+                          : 'border-fuchsia-300 bg-gradient-to-br from-white to-fuchsia-50'
+                      }`}>
+                        <div className={`absolute inset-0 ${
+                          isDarkMode 
+                            ? 'bg-gradient-to-br from-fuchsia-500/5 to-pink-500/5' 
+                            : 'bg-gradient-to-br from-fuchsia-500/5 to-pink-500/5'
+                        }`} />
                         
                         <CardHeader className="relative space-y-4 pb-4">
-                          <div className="p-4 bg-gradient-to-br from-fuchsia-100 to-pink-100 rounded-xl w-fit">
+                          <div className={`p-4 rounded-xl w-fit ${
+                            isDarkMode 
+                              ? 'bg-gradient-to-br from-fuchsia-500/20 to-pink-500/20' 
+                              : 'bg-gradient-to-br from-fuchsia-100 to-pink-100'
+                          }`}>
                             {module.icon}
                           </div>
                           <div>
-                            <CardTitle className="text-2xl text-zinc-900 mb-2">
+                            <CardTitle className={`text-2xl mb-2 ${
+                              isDarkMode ? 'text-white' : 'text-zinc-900'
+                            }`}>
                               {module.title}
                             </CardTitle>
-                            <CardDescription className="text-base text-zinc-600">
+                            <CardDescription className={`text-base ${
+                              isDarkMode ? 'text-zinc-300' : 'text-zinc-600'
+                            }`}>
                               {module.description}
                             </CardDescription>
                           </div>
@@ -384,15 +508,21 @@ const Dashboard: React.FC = () => {
 
                         <CardContent className="relative space-y-6">
                           <div className="space-y-3">
-                            <div className="flex items-center text-sm text-zinc-600">
+                            <div className={`flex items-center text-sm ${
+                              isDarkMode ? 'text-zinc-300' : 'text-zinc-600'
+                            }`}>
                               <KeyRound className="w-4 h-4 mr-2 text-fuchsia-500" />
                               Privacy-Preserving Trading
                             </div>
-                            <div className="flex items-center text-sm text-zinc-600">
+                            <div className={`flex items-center text-sm ${
+                              isDarkMode ? 'text-zinc-300' : 'text-zinc-600'
+                            }`}>
                               <Shield className="w-4 h-4 mr-2 text-fuchsia-500" />
                               Zero-Knowledge Proofs
                             </div>
-                            <div className="flex items-center text-sm text-zinc-600">
+                            <div className={`flex items-center text-sm ${
+                              isDarkMode ? 'text-zinc-300' : 'text-zinc-600'
+                            }`}>
                               <Zap className="w-4 h-4 mr-2 text-fuchsia-500" />
                               Reordering, Front running Protection
                             </div>
@@ -413,7 +543,7 @@ const Dashboard: React.FC = () => {
                           </Button>
 
                           {completedModules.has(module.id) && (
-                            <div className="flex items-center justify-center text-green-600">
+                            <div className="flex items-center justify-center text-green-500">
                               <CheckCircle className="w-4 h-4 mr-1" />
                               Completed
                             </div>
@@ -429,16 +559,23 @@ const Dashboard: React.FC = () => {
         </motion.div>
       </main>
 
-      {/* Simplified Footer - Only Socials */}
-      <footer className="bg-zinc-900 text-white">
+      {/* Footer */}
+      <footer className={`transition-colors duration-300 ${
+        isDarkMode ? 'bg-black text-white' : 'bg-zinc-900 text-white'
+      }`}>
         <div className="h-1 bg-gradient-to-r from-fuchsia-500 via-pink-500 to-fuchsia-600" />
         <div className="container mx-auto px-6 py-12">
           <div className="text-center space-y-6">
             <h3 className="text-xl font-semibold">Follow me</h3>
             <div className="flex items-center justify-center space-x-8">
               <a 
-                href="https://x.com/defi_not_defry" target="_blank"
-                className="flex items-center space-x-2 text-zinc-400 hover:text-white transition-colors group"
+                href="https://x.com/defi_not_defry" 
+                target="_blank"
+                className={`flex items-center space-x-2 transition-colors group ${
+                  isDarkMode 
+                    ? 'text-zinc-400 hover:text-white' 
+                    : 'text-zinc-400 hover:text-white'
+                }`}
               >
                 <Twitter className="w-5 h-5 group-hover:text-blue-400 transition-colors" />
                 <span>Twitter / X</span>
@@ -446,7 +583,9 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
           
-          <div className="border-t border-zinc-800 mt-8 pt-8 text-center text-sm text-zinc-400">
+          <div className={`border-t mt-8 pt-8 text-center text-sm ${
+            isDarkMode ? 'border-zinc-800 text-zinc-400' : 'border-zinc-800 text-zinc-400'
+          }`}>
             <p>&copy; 2025 Learning Hub. Learn by experiencing</p>
           </div>
         </div>
