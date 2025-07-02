@@ -60,7 +60,7 @@ const Dashboard: React.FC = () => {
     {
       id: 'sequencer-role',
       title: 'Sequencer Simulator',
-      description: 'Learn reordering, front-running, and sandwich attack mechanisms',
+      description: 'Learn Reordering, Front-running, and Sandwich attack mechanisms',
       url: 'https://sequencer-role.vercel.app/',
       icon: <Zap className="w-5 h-5" />,
       completed: false
