@@ -51,7 +51,7 @@ const Dashboard: React.FC = () => {
     },
     {
       id: 'order-censorship',
-      title: 'Order Censorship',
+      title: 'Order Censorship and Escape Hatch',
       description: 'Exploring limitations and manipulation in centralized exchanges',
       url: 'https://order-censorship-escape-hatch.vercel.app/',
       icon: <AlertTriangle className="w-5 h-5" />,
