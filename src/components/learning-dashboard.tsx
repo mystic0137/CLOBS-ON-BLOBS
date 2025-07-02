@@ -208,14 +208,7 @@ const Dashboard: React.FC = () => {
                   />
                 </div>
               </div>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-fuchsia-500 text-white border-fuchsia-500 hover:bg-fuchsia-600 hover:border-fuchsia-600"
-              >
-                Start Learning
-              </Button>
+            
             </div>
           </div>
         </div>
