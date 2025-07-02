@@ -434,7 +434,7 @@ const Dashboard: React.FC = () => {
         <div className="h-1 bg-gradient-to-r from-fuchsia-500 via-pink-500 to-fuchsia-600" />
         <div className="container mx-auto px-6 py-12">
           <div className="text-center space-y-6">
-            <h3 className="text-xl font-semibold">Connect with me</h3>
+            <h3 className="text-xl font-semibold">Follow me</h3>
             <div className="flex items-center justify-center space-x-8">
               <a 
                 href="https://x.com/defi_not_defry" target="_blank"
